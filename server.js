@@ -13,7 +13,7 @@ app.use(cors({
 
 app.use(express.json())
 
-app.post('/api/contact', (req, res) => {
+async function handleContactRequest(req, res) {
   const { artworkId, artworkTitle, category, collectorEmail } = req.body
 
   console.log('Contact request received:', {
@@ -22,19 +22,21 @@ app.post('/api/contact', (req, res) => {
     collectorEmail
   })
 
-  amplitude.track('Contact Requested', {
-  artwork_id: artworkId,
-  artwork_title: artworkTitle,
-  category: category
-}, {
-  user_id: 'collector-001'
-})
+  await amplitude.track('Contact Requested', {
+    artwork_id: artworkId,
+    artwork_title: artworkTitle,
+    category: category
+  }, {
+    user_id: 'collector-001'
+  }).promise
 
   res.json({
     success: true,
     message: 'Contact request received.'
   })
-})
+}
+
+app.post('/api/contact', handleContactRequest)
 
 app.listen(port, () => {
   console.log(`ArtMatch server running on http://localhost:${port}`)
